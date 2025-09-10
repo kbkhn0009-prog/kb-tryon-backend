@@ -1,4 +1,7 @@
 import os
+HEAD
+import io
+1d9d5c88e69423d15e120266db4a8700ca9dc747
 import time
 import requests
 from flask import Flask, request, jsonify
@@ -48,16 +51,27 @@ def tryon():
 
         headers = {"x-api-key": API_KEY}
 
+<<<<<<< HEAD
         # --- Шаг 1. Отправляем фото + параметры ---
         process_url = "https://deep-image.ai/rest_api/process"
         files = {"file": (photo.filename, photo.stream, photo.mimetype)}
         payload = {
+=======
+        # --- Шаг 1. Запускаем обработку ---
+        process_url = "https://deep-image.ai/rest_api/process"
+        files = {"file": (photo.filename, photo.stream, photo.mimetype)}
+        data = {
+>>>>>>> 1d9d5c88e69423d15e120266db4a8700ca9dc747
             "enhancements": ["denoise", "deblur", "light"],
             "url": target_url,
             "width": 2000
         }
 
+<<<<<<< HEAD
         r1 = requests.post(process_url, headers=headers, files=files, data=payload, timeout=120)
+=======
+        r1 = requests.post(process_url, headers=headers, files=files, data={"parameters": str(data)}, timeout=120)
+>>>>>>> 1d9d5c88e69423d15e120266db4a8700ca9dc747
         if r1.status_code >= 400:
             return jsonify({"error": f"Face API process error {r1.status_code}", "details": r1.text}), 502
 
