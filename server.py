@@ -17,11 +17,6 @@ CORS(app, resources={r"/api/*": {"origins": [
 
 API_KEY = os.getenv("FACE_API_KEY")  # ключ Deep-Image
 
-BASE_IMAGES = {
-    "black": "https://www.karlbarbini.ru/assets/black1.jpg",
-    "white": "https://www.karlbarbini.ru/assets/white1.jpg",
-}
-
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_ADMIN_CHAT_ID = os.getenv("TELEGRAM_ADMIN_CHAT_ID")
 
@@ -38,21 +33,15 @@ def tryon():
             return jsonify({"error": "Отсутствует файл photo"}), 400
 
         photo = request.files["photo"]
-        dress = (request.form.get("dress") or "black").lower()
         contact = (request.form.get("contact") or "").strip()
 
-        if dress not in BASE_IMAGES:
-            return jsonify({"error": "Некорректное значение dress"}), 400
-
-        target_url = BASE_IMAGES[dress]
         headers = {"x-api-key": API_KEY}
 
-        # --- Шаг 1. Отправляем фото + параметры ---
+        # --- Шаг 1. Отправляем только фото ---
         process_url = "https://deep-image.ai/rest_api/process"
         files = {"file": (photo.filename, photo.stream, photo.mimetype)}
         payload = {
             "enhancements": ["denoise", "deblur", "light"],
-            "url": target_url,
             "width": 2000
         }
 
@@ -77,7 +66,7 @@ def tryon():
             output_url = result.get("url")
             if output_url:
                 break
-            time.sleep(3)  # ждём, пока картинка обработается
+            time.sleep(3)
 
         if not output_url:
             return jsonify({"error": "API не вернул ссылку на результат", "raw": result}), 502
@@ -85,7 +74,7 @@ def tryon():
         # --- Отправка админу в Telegram ---
         if TELEGRAM_BOT_TOKEN and TELEGRAM_ADMIN_CHAT_ID:
             try:
-                caption = f"Виртуальная примерка ({dress}). Контакт: {contact}"
+                caption = f"Виртуальная примерка. Контакт: {contact}"
                 tg_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
                 img = requests.get(output_url, timeout=60).content
                 requests.post(tg_url, data={"chat_id": TELEGRAM_ADMIN_CHAT_ID, "caption": caption},
