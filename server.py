@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": [
     "https://www.karlbarbini.ru",
     "https://kbkhn0009-prog.github.io",
-    "http://localhost:5500",  # для локальных тестов
+    "http://localhost:5500",   # локальные тесты
     "http://127.0.0.1:5500"
 ]}})
 
@@ -45,7 +45,6 @@ def tryon():
             return jsonify({"error": "Некорректное значение dress"}), 400
 
         target_url = BASE_IMAGES[dress]
-
         headers = {"x-api-key": API_KEY}
 
         # --- Шаг 1. Отправляем фото + параметры ---
@@ -78,7 +77,7 @@ def tryon():
             output_url = result.get("url")
             if output_url:
                 break
-            time.sleep(3)  # подождём немного, пока обработка закончится
+            time.sleep(3)  # ждём, пока картинка обработается
 
         if not output_url:
             return jsonify({"error": "API не вернул ссылку на результат", "raw": result}), 502
@@ -102,8 +101,3 @@ def tryon():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)
-
-git add server.py
-git commit -m "Resolve conflict: overwrite with Deep-Image version"
-git push origin main
-
